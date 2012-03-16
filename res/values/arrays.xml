@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="arrays_pref_intervals">
+        <item>巡回しない</item>
+        <item>15分毎</item>
+        <item>30分毎</item>
+        <item>1時間毎</item>
+    </string-array>
+    <string-array name="arrays_pref_interval_values">
+        <item>0</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+    </string-array>
+    <string-array name="arrays_entry_actions">
+        <item>共有する</item>
+        <item>お気に入り</item>
+        <item>既読にする</item>
+        <item>削除する</item>
+    </string-array>
+    <string-array name="arrays_entry_action_values">
+        <item>share</item>
+        <item>make_favorite</item>
+        <item>make_read</item>
+        <item>delete</item>
+    </string-array>
+</resources>

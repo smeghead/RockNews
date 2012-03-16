@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.starbug1.android.rocknews"
+        android:versionCode="1" android:versionName="0.0.1">
+    <uses-sdk android:minSdkVersion="7"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    
+    <application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="false" android:theme="@style/CustomTheme">
+        <activity android:name=".RocknewsActivity"
+                android:label="@string/app_name"
+                android:configChanges="orientation|keyboardHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:label="@string/app_name"
+            android:name=".AppPrefActivity" >
+        </activity>
+        <receiver android:name=".AlarmReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+        <service android:enabled="true" android:name="com.starbug1.android.mudanews.FetchFeedService" />
+        <activity android:name="com.starbug1.android.mudanews.NewsDetailActivity"></activity>
+        <activity
+                android:name="com.google.ads.AdActivity" 
+                android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
+        <!-- PaRappa Support Activity -->
+        <activity
+            android:name="me.parappa.sdk.activity.SupportActivity"
+            android:label="@string/app_name"
+            android:configChanges="orientation|keyboardHidden">
+        </activity>
+        <!-- PaRappa Notify Activity -->
+        <activity
+            android:name="me.parappa.sdk.activity.NotifyActivity"
+            android:label="@string/app_name"
+            android:configChanges="orientation|keyboardHidden" />
+        <!-- PaRappa Notify Service -->
+        <service android:name="me.parappa.sdk.service.NotifyService" />
+        <!-- PaRappa Receiver -->
+        <receiver android:name="me.parappa.sdk.receiver.StartReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+        <!-- PaRappa Application Code Setting -->
+        <meta-data android:name="PARAPPA_APP_CODE" android:value="k1Uybb1t"/>
+    </application>
+    
+    <meta-data android:name="ADMOB_PUBLISHER_ID" android:value="a14f636ef52e0aa"/>
+</manifest>

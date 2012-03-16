@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, MudanewsActivity!</string>
+    <string name="app_name">ロックニュース</string>
+    <string name="shareDescription">一番カジュアルなAndroid用 新聞アプリ\n http://goo.gl/c0j2H</string>
+</resources>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CustomTheme">        
+	    <item name="android:windowNoTitle">true</item>
+<!-- 
+	    <item name="android:windowFrame">@drawable/screen_frame</item>
+		
+	    <item name="android:windowBackground">@drawable/screen_background_white</item>
+	    http://www.techdoctranslator.com/android/guide/ui/themes
+ -->
+<!--        <item name="android:textColor">#000000</item>
+        <item name="android:background">#ffffff</item>
+         <item name="android:typeface">monospace</item> -->
+  	</style>
+  	<style name="appLayout">
+  	 <item name="android:background">#ffffff</item>
+  	 <item name="android:textColor">#000000</item>
+  	</style>
+    <style name="appPrefItem">
+     <item name="android:textColor">#000000</item>
+    </style>
+
+
+
+
+
+
+</resources>
+  
