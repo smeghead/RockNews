@@ -15,7 +15,7 @@ public class AppUtils {
 					PackageManager.GET_META_DATA);
 			return "Version " + packageInfo.versionName;
 		} catch (NameNotFoundException e) {
-			Log.e("NudaNewsActivity", "failed to retreive version info.");
+			Log.e("AppUtils", "failed to retreive version info.");
 		}
 		return "";
 	}

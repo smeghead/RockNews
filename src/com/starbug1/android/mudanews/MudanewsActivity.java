@@ -53,6 +53,7 @@ import com.starbug1.android.mudanews.data.NewsListItem;
 import com.starbug1.android.mudanews.utils.AppUtils;
 import com.starbug1.android.mudanews.utils.UrlUtils;
 import com.starbug1.android.rocknews.R;
+import com.starbug1.android.rocknews.RockNewsPrefActivity;
 
 public class MudanewsActivity extends Activity {
 	private List<NewsListItem> items_;
@@ -449,7 +450,7 @@ public class MudanewsActivity extends Activity {
 	}
 		
 	private void settings() {
-		Intent intent = new Intent(this, AppPrefActivity.class);
+		Intent intent = new Intent(this, RockNewsPrefActivity.class);
 		startActivity(intent);
 	}
 

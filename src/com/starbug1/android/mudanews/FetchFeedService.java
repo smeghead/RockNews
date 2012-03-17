@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -53,6 +54,7 @@ import com.starbug1.android.mudanews.utils.FileDownloader;
 import com.starbug1.android.mudanews.utils.InternetStatus;
 import com.starbug1.android.mudanews.utils.UrlUtils;
 import com.starbug1.android.rocknews.R;
+import com.starbug1.android.rocknews.RocknewsActivity;
 
 /**
  * @author smeghead
@@ -137,7 +139,7 @@ public class FetchFeedService extends Service {
 					}
 
 					Intent intent = new Intent(FetchFeedService.this,
-							MudanewsActivity.class);
+							RocknewsActivity.class);
 					PendingIntent contentIntent = PendingIntent.getActivity(
 							FetchFeedService.this, 0, intent, 0);
 					notification.setLatestEventInfo(getApplicationContext(), getResources().getString(R.string.app_name),
@@ -267,6 +269,9 @@ public class FetchFeedService extends Service {
 							} else if (tag.equals("date")) {
 								String dateExp = parser.nextText();
 								currentItem.setPublishedAt(parseDate(dateExp));
+							} else if (tag.equals("pubDate")) {
+								String dateExp = parser.nextText();
+								currentItem.setPublishedAt(parseDate(dateExp));
 							}
 						}
 						break;
@@ -318,7 +323,7 @@ public class FetchFeedService extends Service {
 			return d.getTime();
 		}
 		try {
-			SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z");
+			SimpleDateFormat format = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.US);
 			d = format.parse(src);
 		} catch (Exception e) {
 			Log.e("FetchFeedService", e.getMessage());
