@@ -30,7 +30,7 @@ public class AppPrefActivity extends PreferenceActivity {
 		clowlIntervalsPref_ = (ListPreference) findPreference("clowl_intervals");
 
 		clowlIntervalsPref_.setSummary(getStringByValue(clowlIntervalsPref_,
-				sharedPref_.getString("clowl_intervals", "15")));
+				sharedPref_.getString("clowl_intervals", "60")));
 		clowlIntervalsPref_
 				.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
 					public boolean onPreferenceChange(Preference preference,

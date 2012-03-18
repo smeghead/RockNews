@@ -85,7 +85,7 @@ public class FetchFeedService extends Service {
 		Log.d("FetchFeedService", "onCreate");
 		
 		sharedPreferences_ = PreferenceManager.getDefaultSharedPreferences(this);
-		int clowlIntervals = Integer.parseInt(sharedPreferences_.getString("clowl_intervals", "15"));
+		int clowlIntervals = Integer.parseInt(sharedPreferences_.getString("clowl_intervals", "60"));
 		if (clowlIntervals != 0) {
 			AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 			Intent alarmIntent = new Intent(this, AlarmReceiver.class);
@@ -118,7 +118,7 @@ public class FetchFeedService extends Service {
 		
 		boolean nightClowl = sharedPreferences_.getBoolean("pref_night_clowl", false);
 		int hour = new Date().getHours();
-		if (!nightClowl && (hour < 8)) {
+		if (!nightClowl && (hour < 8 || hour > 22)) {
 			Log.d("FetchFeedService", "this is night. zzz");
 			return;
 		}
@@ -280,7 +280,8 @@ public class FetchFeedService extends Service {
 						if (tag.equals("item")) {
 							if (currentItem.getTitle().toString().indexOf("［PR］") == -1
 									&& currentItem.getTitle().toString().indexOf("PR:") == -1
-									&& currentItem.getTitle().toString().indexOf("ヘッドラインニュース") == -1) {
+									&& currentItem.getTitle().toString().indexOf("ヘッドラインニュース") == -1
+									&& currentItem.getLink().toString().indexOf("/blog/") == -1) {
 								list.add(currentItem);
 								if (list.size() > 10) {
 									break DOC;
@@ -334,6 +335,10 @@ public class FetchFeedService extends Service {
 		return 0;
 	}
 
+	private Pattern imageUrl_ = Pattern.compile("<img.*?src=\"([^\"]*)\"", Pattern.MULTILINE);
+	private Pattern skreamContent_ = Pattern.compile("id=\"news-area\"(.*)id=\"sub-news\"", Pattern.DOTALL);
+	private Pattern ro69Content_ = Pattern.compile("news-text(.*)ref-link-title", Pattern.DOTALL);
+	
 	private NewsListItem fetchImage(NewsListItem item) {
 			String imageUrl = item.getImageUrl();
 			if (imageUrl == null || imageUrl.length() == 0) {
@@ -341,28 +346,23 @@ public class FetchFeedService extends Service {
 					Log.d("FetchFeedService", "link: " + item.getLink());
 					String content = FileDownloader.download(item.getLink());
 					if (item.getSource().equals("Skream!")) {
-						Pattern p = Pattern.compile("id=\"news-area\"(.*)id=\"sub-news\"", Pattern.DOTALL);
-						Matcher m = p.matcher(content);
+						Matcher m = skreamContent_.matcher(content);
 						if (!m.find()) {
 							return item;
 						}
 						String mainPart = m.group(1);
-						p = Pattern.compile("<img.*?src=\"([^\"]*)\"", Pattern.MULTILINE);
-						m = p.matcher(mainPart);
+						m = imageUrl_.matcher(mainPart);
 						if (!m.find()) {
 							return item;
 						}
 						imageUrl = m.group(1);
 					} else if (item.getSource().equals("RO69")) {
-						Pattern p = Pattern.compile("news-text(.*)ref-link-title", Pattern.DOTALL);
-						Log.d("FetchFeedService", content);
-						Matcher m = p.matcher(content);
+						Matcher m = ro69Content_.matcher(content);
 						if (!m.find()) {
 							return item;
 						}
 						String mainPart = m.group(1);
-						p = Pattern.compile("<img.*?src=\"([^\"]*)\"", Pattern.MULTILINE);
-						m = p.matcher(mainPart);
+						m = imageUrl_.matcher(mainPart);
 						if (!m.find()) {
 							return item;
 						}
@@ -370,6 +370,7 @@ public class FetchFeedService extends Service {
 						if (imageUrl != null && imageUrl.startsWith("/")) {
 							imageUrl = UrlUtils.findSchemaDomain(item.getLink()) + imageUrl;
 						}
+						Log.d(TAG, "imageUrl:" + imageUrl);
 					}
 				} catch (AppException e) {
 					Log.e("FetchFeedService", "failed to download content.");
