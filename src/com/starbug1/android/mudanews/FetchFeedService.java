@@ -51,6 +51,7 @@ import android.util.Xml;
 import com.starbug1.android.mudanews.data.DatabaseHelper;
 import com.starbug1.android.mudanews.data.NewsListItem;
 import com.starbug1.android.mudanews.utils.FileDownloader;
+import com.starbug1.android.mudanews.utils.FlushedInputStream;
 import com.starbug1.android.mudanews.utils.InternetStatus;
 import com.starbug1.android.mudanews.utils.UrlUtils;
 import com.starbug1.android.rocknews.R;
@@ -341,48 +342,56 @@ public class FetchFeedService extends Service {
 	
 	private NewsListItem fetchImage(NewsListItem item) {
 			String imageUrl = item.getImageUrl();
-			if (imageUrl == null || imageUrl.length() == 0) {
-				try {
-					Log.d("FetchFeedService", "link: " + item.getLink());
-					String content = FileDownloader.download(item.getLink());
-					if (item.getSource().equals("Skream!")) {
-						Matcher m = skreamContent_.matcher(content);
-						if (!m.find()) {
-							return item;
+			FETCH_IMAGE: for (int i = 0; i < 3; i++) {
+				Log.d(TAG, "try " + i);
+				if (imageUrl == null || imageUrl.length() == 0) {
+					try {
+						Log.d("FetchFeedService", "link: " + item.getLink());
+						String content = FileDownloader.download(item.getLink());
+						if (item.getSource().equals("Skream!")) {
+							Matcher m = skreamContent_.matcher(content);
+							if (!m.find()) {
+								continue FETCH_IMAGE;
+							}
+							String mainPart = m.group(1);
+							m = imageUrl_.matcher(mainPart);
+							if (!m.find()) {
+								continue FETCH_IMAGE;
+							}
+							imageUrl = m.group(1);
+							break;
+						} else if (item.getSource().equals("RO69")) {
+							Matcher m = ro69Content_.matcher(content);
+							if (!m.find()) {
+								continue FETCH_IMAGE;
+							}
+							String mainPart = m.group(1);
+							m = imageUrl_.matcher(mainPart);
+							if (!m.find()) {
+								continue FETCH_IMAGE;
+							}
+							imageUrl = m.group(1);
+							if (imageUrl != null && imageUrl.startsWith("/")) {
+								imageUrl = UrlUtils.findSchemaDomain(item.getLink()) + imageUrl;
+							}
+							Log.d(TAG, "imageUrl:" + imageUrl);
+							break;
 						}
-						String mainPart = m.group(1);
-						m = imageUrl_.matcher(mainPart);
-						if (!m.find()) {
-							return item;
-						}
-						imageUrl = m.group(1);
-					} else if (item.getSource().equals("RO69")) {
-						Matcher m = ro69Content_.matcher(content);
-						if (!m.find()) {
-							return item;
-						}
-						String mainPart = m.group(1);
-						m = imageUrl_.matcher(mainPart);
-						if (!m.find()) {
-							return item;
-						}
-						imageUrl = m.group(1);
-						if (imageUrl != null && imageUrl.startsWith("/")) {
-							imageUrl = UrlUtils.findSchemaDomain(item.getLink()) + imageUrl;
-						}
-						Log.d(TAG, "imageUrl:" + imageUrl);
+					} catch (AppException e) {
+						Log.e("FetchFeedService", "failed to download content.");
+						continue FETCH_IMAGE;
 					}
-				} catch (AppException e) {
-					Log.e("FetchFeedService", "failed to download content.");
-					return item;
 				}
+			}
+			if (imageUrl == null || imageUrl.length() == 0) {
+				return item;
 			}
 			URL url;
 			InputStream is = null;
 			try {
 				url = new URL(imageUrl);
 				is = url.openConnection().getInputStream();
-				Bitmap image = BitmapFactory.decodeStream(is);
+				Bitmap image = BitmapFactory.decodeStream(new FlushedInputStream(is));
 				
 				int heightOrg = image.getHeight(), widthOrg = image.getWidth();
 				int height = 0, width = 0;
