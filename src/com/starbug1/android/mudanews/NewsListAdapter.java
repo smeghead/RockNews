@@ -123,7 +123,8 @@ public class NewsListAdapter extends ArrayAdapter<NewsListItem> {
 				Log.d("NewsListAdapter", "item more? id:" + item.getId());
 				ImageView image = (ImageView) view
 						.findViewById(R.id.item_image);
-				image.setVisibility(ImageView.GONE);
+				image.setImageResource(R.drawable.no_image);
+				image.setVisibility(ImageView.VISIBLE);
 			}
 		}
 		return view;

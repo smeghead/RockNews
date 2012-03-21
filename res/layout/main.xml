@@ -16,7 +16,7 @@
 			<TextView android:id="@+id/version" android:layout_height="wrap_content" android:textColor="#ffffffff" android:layout_width="fill_parent" android:height="40px" android:gravity="right|center" android:paddingRight="5px" android:textSize="12sp" android:text="Version 1.1.0"></TextView>  
 		</RelativeLayout>  
 		<LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/linearLayout1" android:orientation="vertical">
-			<Button android:layout_height="wrap_content" android:id="@+id/fetchfeeds" android:text=" 記事を取得する" android:layout_width="fill_parent" android:visibility="gone"></Button>
+			<Button android:layout_height="wrap_content" android:id="@+id/fetchfeeds" android:text="@string/initial_message" android:layout_width="fill_parent" android:visibility="gone" android:gravity="left"></Button>
 			<GridView
 					android:id="@+id/grid"
 					android:stretchMode="columnWidth" 
