@@ -119,7 +119,7 @@ public class FetchFeedService extends Service {
 		
 		boolean nightClowl = sharedPreferences_.getBoolean("pref_night_clowl", false);
 		int hour = new Date().getHours();
-		if (!nightClowl && (hour < 8 || hour > 22)) {
+		if (!nightClowl && hour < 7) {
 			Log.d("FetchFeedService", "this is night. zzz");
 			return;
 		}
@@ -338,9 +338,9 @@ public class FetchFeedService extends Service {
 
 	private Pattern imageUrl_ = Pattern.compile("<img.*?src=\"([^\"]*)\"", Pattern.MULTILINE);
 	private Pattern skreamContent_ = Pattern.compile("id=\"news-area\"(.*)id=\"sub-news\"", Pattern.DOTALL);
-	private Pattern ro69Content_ = Pattern.compile("news-text(.*)ref-link-title", Pattern.DOTALL);
+	private Pattern ro69Content_ = Pattern.compile("article_body(.*)// div.article_body", Pattern.DOTALL);
 	
-	private NewsListItem fetchImage(NewsListItem item) {
+	synchronized private NewsListItem fetchImage(NewsListItem item) {
 			String imageUrl = item.getImageUrl();
 			FETCH_IMAGE: for (int i = 0; i < 3; i++) {
 				Log.d(TAG, "try " + i);

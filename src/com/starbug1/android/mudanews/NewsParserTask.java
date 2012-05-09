@@ -26,19 +26,16 @@ public class NewsParserTask extends AsyncTask<String, Integer, List<NewsListItem
 	private final int MAX_ENTRIES_PER_PAGE = 30;
 	private final MudanewsActivity activity_;
 	private final NewsListAdapter adapter_;
-	private ProgressDialog progresDialog_;
 	private int page_;
 
 	public NewsParserTask(MudanewsActivity activity, NewsListAdapter adapter) {
 		activity_ = activity;
 		adapter_ = adapter;
+		activity_.gridUpdating = true;
 	}
 	
 	@Override
 	protected void onPreExecute() {
-		progresDialog_ = new ProgressDialog(activity_);
-		progresDialog_.setMessage("読み込み中...");
-		progresDialog_.show();
 	}
 	
 	/* (non-Javadoc)
@@ -68,6 +65,10 @@ public class NewsParserTask extends AsyncTask<String, Integer, List<NewsListItem
 							String.valueOf(page_ * MAX_ENTRIES_PER_PAGE)}
 			);
 			c.moveToFirst();
+			if (c.getCount() == 0) {
+				activity_.hasNextPage = false;
+				return result;
+			}
 			for (int i = 0, len = c.getCount(); i < len; i++) {
 				NewsListItem item = new NewsListItem();
 				item.setId(Integer.parseInt(c.getString(0)));
@@ -108,7 +109,7 @@ public class NewsParserTask extends AsyncTask<String, Integer, List<NewsListItem
 	protected void onPostExecute(List<NewsListItem> result) {
 		progresCancel();
 		
-		boolean hasNextPages = result.size() > MAX_ENTRIES_PER_PAGE;
+		activity_.hasNextPage = result.size() > MAX_ENTRIES_PER_PAGE;
 		int addedCount = 0;
 		for (NewsListItem item : result) {
 			if (addedCount >= MAX_ENTRIES_PER_PAGE) {
@@ -121,15 +122,9 @@ public class NewsParserTask extends AsyncTask<String, Integer, List<NewsListItem
 			GridView view = (GridView) activity_.findViewById(R.id.grid);
 			view.setAdapter(adapter_);
 		}
-		Button more = (Button) activity_.findViewById(R.id.more);
-		more.setTag(Boolean.valueOf(hasNextPages));
-		more.setVisibility(Button.GONE);
+		activity_.gridUpdating = false;
 	}
 	
 	public void progresCancel() {
-		if (progresDialog_ != null && progresDialog_.isShowing()) {
-			progresDialog_.dismiss();
-			progresDialog_ = null;
-		}
 	}
 }

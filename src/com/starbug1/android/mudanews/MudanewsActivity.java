@@ -56,6 +56,8 @@ import com.starbug1.android.rocknews.R;
 import com.starbug1.android.rocknews.RockNewsPrefActivity;
 
 public class MudanewsActivity extends Activity {
+	private static final String TAG = "MudanewsActivity";
+	
 	private List<NewsListItem> items_;
 	private NewsListAdapter adapter_;
 	private int page_ = 0;
@@ -65,7 +67,9 @@ public class MudanewsActivity extends Activity {
 	private ProgressDialog progressDialog_;
 	private DatabaseHelper dbHelper_ = null;
 	private NewsListItem currentItem_ = null;
-	 private PaRappa parappa_;
+	public boolean hasNextPage = true;
+	public boolean gridUpdating = false;
+	private PaRappa parappa_;
 
 	private void setupAnim() {
 		anim_left_in_ = AnimationUtils.loadAnimation(MudanewsActivity.this,
@@ -111,20 +115,20 @@ public class MudanewsActivity extends Activity {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Log.d("MudanewsActivity", "onCreate");
+		Log.d(TAG, "onCreate");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
-		Log.d("MudanewsActivity", "setContentView");
+		Log.d(TAG, "setContentView");
 		
 		dbHelper_ = new DatabaseHelper(MudanewsActivity.this);
 		setupAnim();
 		flipper_ = (ViewFlipper) this.findViewById(R.id.flipper);
-		Log.d("MudanewsActivity", "setupAnim");
+		Log.d(TAG, "setupAnim");
 
 		doBindService();
-		Log.d("MudanewsActivity", "bindService");
+		Log.d(TAG, "bindService");
 
-		page_ = 0;
+		page_ = 0; hasNextPage = true;
 		items_ = new ArrayList<NewsListItem>();
 		adapter_ = new NewsListAdapter(this, items_);
 
@@ -134,7 +138,7 @@ public class MudanewsActivity extends Activity {
 		TextView version2 = (TextView) this.findViewById(R.id.version2);
 		version2.setText(versionName);
 
-		GridView grid = (GridView) this.findViewById(R.id.grid);
+		final GridView grid = (GridView) this.findViewById(R.id.grid);
 		grid.setOnItemClickListener(new OnItemClickListener() {
 
 			public void onItemClick(AdapterView<?> adapter, View view,
@@ -171,7 +175,7 @@ public class MudanewsActivity extends Activity {
 						timer.schedule(new TimerTask() {
 							@Override
 							public void run() {
-								Log.i("MudanewsActivity", "timer taks");
+								Log.i(TAG, "timer taks");
 								if (v.getContentHeight() > 0) {
 									handler_.post(new Runnable() {
 										public void run() {
@@ -200,6 +204,14 @@ public class MudanewsActivity extends Activity {
 						return super.shouldOverrideUrlLoading(view, url);
 					}
 				});
+				ImageView share = (ImageView)findViewById(R.id.image_share);
+				share.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						parappa_.shareString(currentItem_.getTitle() + " " + currentItem_.getLink() + " #" + getResources().getString(R.string.app_name), "共有");
+					}
+				});
+				
 				WebSettings ws = entryView.getSettings();
 				ws.setBuiltInZoomControls(true);
 				ws.setLoadWithOverviewMode(true);
@@ -261,12 +273,12 @@ public class MudanewsActivity extends Activity {
 										"update feeds set deleted = 1 where id = ?",
 										new String[] { String.valueOf(item.getId()) });
 								items_.remove(item);
-								page_ = 0;
+								page_ = 0; hasNextPage = true;
 								Toast.makeText(MudanewsActivity.this, item.getTitle() + "を削除しました", Toast.LENGTH_LONG).show();
 								updateList(page_);
 							}
 						} catch (Exception e) {
-							Log.e("MudanewsActivity", "failed to upate entry action.");
+							Log.e(TAG, "failed to upate entry action.");
 						} finally {
 							db.close();
 						}
@@ -277,33 +289,23 @@ public class MudanewsActivity extends Activity {
 				return true;
 			}
 		});
-		Log.d("MudanewsActivity", "grid setup");
-
-		final Button more = (Button) this.findViewById(R.id.more);
-		more.setVisibility(Button.GONE);
-		more.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				page_++;
-				updateList(page_);
-			}
-		});
-		Log.d("MudanewsActivity", "more button");
+		Log.d(TAG, "grid setup");
 
 		grid.setOnScrollListener(new OnScrollListener() {
 			private boolean stayBottom = false;
 
 			public void onScrollStateChanged(AbsListView view, int scrollState) {
-				if (!Boolean.parseBoolean(more.getTag().toString())) {
-					return;
-				}
 				switch (scrollState) {
 				// スクロールしていない
 				case OnScrollListener.SCROLL_STATE_IDLE:
 				case OnScrollListener.SCROLL_STATE_FLING:
 					if (stayBottom) {
-						more.setVisibility(Button.VISIBLE);
-					} else {
-						more.setVisibility(Button.GONE);
+						Log.d(TAG, "scrollY: " + grid.getHeight());
+						// load more.
+						
+						if (!MudanewsActivity.this.gridUpdating && MudanewsActivity.this.hasNextPage) {
+							updateList(++page_);
+						}
 					}
 					break;
 				}
@@ -311,28 +313,40 @@ public class MudanewsActivity extends Activity {
 
 			public void onScroll(AbsListView view, int firstVisibleItem,
 					int visibleItemCount, int totalItemCount) {
+
 				stayBottom = (totalItemCount == firstVisibleItem
 						+ visibleItemCount);
 			}
 		});
-		Log.d("MudanewsActivity", "scroll");
+		Log.d(TAG, "scroll");
 
 		// 初回起動なら、feed取得 ボタンを表示する
 		if (dbHelper_.entryIsEmpty()) {
-			final Button fetchfeeds = (Button) this.findViewById(R.id.fetchfeeds);
-			fetchfeeds.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					fetchFeeds();
-					updateList(page_);
-					fetchfeeds.setVisibility(Button.GONE);
+			final TextView initialMessage = (TextView) this.findViewById(R.id.initialMessage);
+			initialMessage.setVisibility(Button.VISIBLE);
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					for (int i = 0; i < 10; i++) {
+						try {
+							Thread.sleep(500);
+						} catch (Exception e) {}
+						Log.d(TAG, "service:" + isBound_);
+						if (isBound_) break;
+					}
+					handler_.post(new Runnable() {
+						@Override
+						public void run() {
+							fetchFeeds();
+						}
+					});
 				}
-			});
-			fetchfeeds.setVisibility(Button.VISIBLE);
+			}).start();
 		}
 
-		Log.d("MudanewsActivity", "updateList start.");
+		Log.d(TAG, "updateList start.");
 		updateList(page_);
-		Log.d("MudanewsActivity", "updateList end.");
+		Log.d(TAG, "updateList end.");
 
 		NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		manager.cancelAll();
@@ -420,7 +434,7 @@ public class MudanewsActivity extends Activity {
 
 	private void favorite() {
 		if (currentItem_ == null) return;
-		Log.d("MudanewsActivity", "favorite id:" + currentItem_.getId());
+		Log.d(TAG, "favorite id:" + currentItem_.getId());
 		
 		final SQLiteDatabase db = dbHelper_.getWritableDatabase();
 		try {
@@ -431,7 +445,7 @@ public class MudanewsActivity extends Activity {
 			currentItem_.setFavorite(true);
 			Toast.makeText(MudanewsActivity.this, currentItem_.getTitle() + "をお気に入りにしました", Toast.LENGTH_LONG).show();
 		} catch (Exception e) {
-			Log.e("MudanewsActivity", "failed to favorite.");
+			Log.e(TAG, "failed to favorite.");
 		} finally {
 			if (db != null && db.isOpen())
 				db.close();
@@ -465,8 +479,11 @@ public class MudanewsActivity extends Activity {
 				final int count = fetchFeedService_.updateFeeds();
 				handler_.post(new Runnable() {
 					public void run() {
+						TextView initialMessage = (TextView) findViewById(R.id.initialMessage);
+						initialMessage.setVisibility(TextView.GONE);
+
 						progressDialog_.dismiss();
-						page_ = 0;
+						page_ = 0; hasNextPage = true;
 						items_.clear();
 						updateList(page_);
 						if (count == 0) {

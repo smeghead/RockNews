@@ -2,6 +2,6 @@
 <resources>
     <string name="hello">Hello World, MudanewsActivity!</string>
     <string name="app_name">ロックニュース</string>
-    <string name="shareDescription">一番カジュアルなAndroid用 新聞アプリ\n http://goo.gl/c0j2H</string>
-    <string name="initial_message">インストールありがとうございます。\nこのボタンを押すと記事取得を行ないます。\n(初回の記事取得は時間がかかります)</string>
+    <string name="shareDescription">ロック関係の最新ニュースなら ロックニュース\n http://goo.gl/dOMPj</string>
+    <string name="initial_message">インストールありがとうございます。\n記事取得中です。\n少々お待ちください。\n(初回の記事取得は時間がかかります)</string>
 </resources>

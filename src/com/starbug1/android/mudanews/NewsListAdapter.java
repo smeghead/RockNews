@@ -9,6 +9,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,7 +48,6 @@ public class NewsListAdapter extends ArrayAdapter<NewsListItem> {
 			view = inflater_.inflate(R.layout.item_row, null);
 		}
 
-		Log.d("NewsListAdapter", "position: " + position);
 		if (this.getCount() < position + 1) {
 			Log.w("NewsListAdapter", "position invalid!");
 			return null;
@@ -61,6 +61,7 @@ public class NewsListAdapter extends ArrayAdapter<NewsListItem> {
 			title_.setText(title);
 			ImageView newEntry = (ImageView) view.findViewById(R.id.newEntry);
 			newEntry.setVisibility(item.getViewCount() > 0 ? ImageView.GONE : ImageView.VISIBLE);
+			title_.setTextColor(Color.argb(item.getViewCount() > 0 ? 168 : 230, 255, 255, 255));
 			ImageView isFavorite = (ImageView) view.findViewById(R.id.favorite);
 			isFavorite.setImageResource(item.isFavorite()
 					? android.R.drawable.btn_star_big_on
@@ -97,12 +98,10 @@ public class NewsListAdapter extends ArrayAdapter<NewsListItem> {
 			});
 			GridView grid = (GridView) context_.findViewById(R.id.grid);
 			int size = grid.getWidth() / context_.column_count_;
-			Log.d("NewsListAdapter", "size:" + size);
 			if (item.getImage() != null) {
 				Bitmap bOrg = item.getImageBitmap();
 				if (bOrg == null) {
 					byte[] data = item.getImage();
-					Log.d("NewsListAdapter", "data.length:" + data.length);
 					try {
 						bOrg = BitmapFactory.decodeByteArray(data, 0, data.length);
 					} catch (OutOfMemoryError e) {
