@@ -1,5 +1,7 @@
 package com.starbug1.android.mudanews.data;
 
+import java.io.Serializable;
+
 import android.graphics.Bitmap;
 
 /**
@@ -7,7 +9,9 @@ import android.graphics.Bitmap;
  * 
  * @author smeghead
  */
-public class NewsListItem {
+public class NewsListItem implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	private int id_;
 	private String title_;
 	private String description_;

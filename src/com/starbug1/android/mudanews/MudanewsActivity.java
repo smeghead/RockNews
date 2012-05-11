@@ -18,25 +18,17 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Display;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -46,13 +38,13 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ViewFlipper;
 
 import com.starbug1.android.mudanews.data.DatabaseHelper;
 import com.starbug1.android.mudanews.data.NewsListItem;
 import com.starbug1.android.mudanews.utils.AppUtils;
 import com.starbug1.android.mudanews.utils.UrlUtils;
 import com.starbug1.android.rocknews.R;
+import com.starbug1.android.rocknews.RockNewsEntryActivity;
 import com.starbug1.android.rocknews.RockNewsPrefActivity;
 
 public class MudanewsActivity extends Activity {
@@ -61,9 +53,6 @@ public class MudanewsActivity extends Activity {
 	private List<NewsListItem> items_;
 	private NewsListAdapter adapter_;
 	private int page_ = 0;
-	private ViewFlipper flipper_;
-	private Animation anim_left_in_, anim_left_out_, anim_right_in_,
-			anim_right_out_;
 	private ProgressDialog progressDialog_;
 	private DatabaseHelper dbHelper_ = null;
 	private NewsListItem currentItem_ = null;
@@ -71,21 +60,9 @@ public class MudanewsActivity extends Activity {
 	public boolean gridUpdating = false;
 	private PaRappa parappa_;
 
-	private void setupAnim() {
-		anim_left_in_ = AnimationUtils.loadAnimation(MudanewsActivity.this,
-				R.animator.left_in);
-		anim_left_out_ = AnimationUtils.loadAnimation(MudanewsActivity.this,
-				R.animator.left_out);
-		anim_right_in_ = AnimationUtils.loadAnimation(MudanewsActivity.this,
-				R.animator.right_in);
-		anim_right_out_ = AnimationUtils.loadAnimation(MudanewsActivity.this,
-				R.animator.right_out);
-	}
-
 	private FetchFeedService fetchFeedService_;
 	private boolean isBound_;
 	final Handler handler_ = new Handler();
-	private boolean isViewingEntry_ = false;
 
 	private ServiceConnection connection_ = new ServiceConnection() {
 		public void onServiceConnected(ComponentName className, IBinder service) {
@@ -120,10 +97,7 @@ public class MudanewsActivity extends Activity {
 		setContentView(R.layout.main);
 		Log.d(TAG, "setContentView");
 		
-		dbHelper_ = new DatabaseHelper(MudanewsActivity.this);
-		setupAnim();
-		flipper_ = (ViewFlipper) this.findViewById(R.id.flipper);
-		Log.d(TAG, "setupAnim");
+		dbHelper_ = new DatabaseHelper(this);
 
 		doBindService();
 		Log.d(TAG, "bindService");
@@ -135,8 +109,6 @@ public class MudanewsActivity extends Activity {
 		String versionName = AppUtils.getVersionName(this);
 		TextView version = (TextView) this.findViewById(R.id.version);
 		version.setText(versionName);
-		TextView version2 = (TextView) this.findViewById(R.id.version2);
-		version2.setText(versionName);
 
 		final GridView grid = (GridView) this.findViewById(R.id.grid);
 		grid.setOnItemClickListener(new OnItemClickListener() {
@@ -152,83 +124,18 @@ public class MudanewsActivity extends Activity {
 						new String[] { String.valueOf(item.getId()) });
 				db.close();
 
-				flipper_.setInAnimation(anim_right_in_);
-				flipper_.setOutAnimation(anim_left_out_);
-				flipper_.showNext();
-				isViewingEntry_ = true;
 				item.setViewCount(item.getViewCount() + 1);
 				ImageView newIcon = (ImageView) view
 						.findViewById(R.id.newEntry);
 				newIcon.setVisibility(ImageView.GONE);
 
-				WebView entryView = (WebView) MudanewsActivity.this
-						.findViewById(R.id.entryView);
+				Intent entryIntent = new Intent(MudanewsActivity.this, RockNewsEntryActivity.class);
+				entryIntent.putExtra("item", item);
+				MudanewsActivity.this.startActivity(entryIntent);
 				
-				entryView.setWebViewClient(new WebViewClient() {
-
-					@Override
-					public void onPageStarted(WebView view, String url,
-							Bitmap favicon) {
-						final WebView v = view;
-						Log.d("NewsDetailActivity", "onPageStarted url: " + url);
-						final Timer timer = new Timer();
-						timer.schedule(new TimerTask() {
-							@Override
-							public void run() {
-								Log.i(TAG, "timer taks");
-								if (v.getContentHeight() > 0) {
-									handler_.post(new Runnable() {
-										public void run() {
-											if (progressDialog_ != null) {
-												progressDialog_.dismiss();
-											}
-										}
-									});
-									timer.cancel();
-								}
-							}
-						}, 1000, 1000);
-					}
-
-					@Override
-					public boolean shouldOverrideUrlLoading(WebView view,
-							String url) {
-						if (!url.startsWith("file") && !UrlUtils.isSameDomain(view.getOriginalUrl(), url)) {
-							Intent intent = new Intent(Intent.ACTION_VIEW, Uri
-									.parse(url));
-							startActivity(intent);
-							return true;
-						}
-						Log.d("NewsDetailActivity",
-								"shouldOverrideUrlLoading url: " + url);
-						return super.shouldOverrideUrlLoading(view, url);
-					}
-				});
-				ImageView share = (ImageView)findViewById(R.id.image_share);
-				share.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						parappa_.shareString(currentItem_.getTitle() + " " + currentItem_.getLink() + " #" + getResources().getString(R.string.app_name), "共有");
-					}
-				});
-				
-				WebSettings ws = entryView.getSettings();
-				ws.setBuiltInZoomControls(true);
-				ws.setLoadWithOverviewMode(true);
-				ws.setPluginsEnabled(true);
-				ws.setUseWideViewPort(true);
-				ws.setJavaScriptEnabled(true);
-				ws.setAppCacheMaxSize(1024 * 1024 * 64); //64MB
-				ws.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-				ws.setDomStorageEnabled(true);
-				ws.setAppCacheEnabled(true);
-				entryView.setVerticalScrollbarOverlay(true);
-				entryView.loadUrl(UrlUtils.mobileUrl(item.getLink()));
-				progressDialog_ = new ProgressDialog(MudanewsActivity.this);
-				progressDialog_.setMessage("読み込み中...");
-				progressDialog_.show();
 			}
 		});
+
 		grid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 			
 			public boolean onItemLongClick(AdapterView<?> arg0, View viewArg,
@@ -383,19 +290,6 @@ public class MudanewsActivity extends Activity {
 
 	@Override
 	public boolean onMenuOpened(int featureId, Menu menu) {
-		if (isViewingEntry_) {
-			menu.findItem(R.id.menu_update_feeds).setVisible(false);
-			menu.findItem(R.id.menu_reload).setVisible(true);
-			menu.findItem(R.id.menu_share).setVisible(true);
-			menu.findItem(R.id.menu_settings).setVisible(false);
-			menu.findItem(R.id.menu_favorite).setVisible(true);
-		} else {
-			menu.findItem(R.id.menu_share).setVisible(false);
-			menu.findItem(R.id.menu_reload).setVisible(false);
-			menu.findItem(R.id.menu_update_feeds).setVisible(true);
-			menu.findItem(R.id.menu_settings).setVisible(true);
-			menu.findItem(R.id.menu_favorite).setVisible(false);
-		}
 		return super.onMenuOpened(featureId, menu);
 	}
 
@@ -413,17 +307,11 @@ public class MudanewsActivity extends Activity {
 		case R.id.menu_settings:
 			settings();
 			break;
-		case R.id.menu_share:
-			share();
-			break;
 		case R.id.menu_notify_all:
 			shareAll();
 			break;
 		case R.id.menu_review:
 			parappa_.gotoMarket();
-			break;
-		case R.id.menu_favorite:
-			favorite();
 			break;
 		case R.id.menu_support:
 			parappa_.startSupportActivity();
@@ -432,33 +320,6 @@ public class MudanewsActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	private void favorite() {
-		if (currentItem_ == null) return;
-		Log.d(TAG, "favorite id:" + currentItem_.getId());
-		
-		final SQLiteDatabase db = dbHelper_.getWritableDatabase();
-		try {
-			// お気に入り
-			db.execSQL(
-					"insert into favorites (feed_id, created_at) values (?, current_timestamp)",
-					new String[] { String.valueOf(currentItem_.getId()) });
-			currentItem_.setFavorite(true);
-			Toast.makeText(MudanewsActivity.this, currentItem_.getTitle() + "をお気に入りにしました", Toast.LENGTH_LONG).show();
-		} catch (Exception e) {
-			Log.e(TAG, "failed to favorite.");
-		} finally {
-			if (db != null && db.isOpen())
-				db.close();
-		}
-	}
-	
-	private void share() {
-		if (currentItem_ == null) {
-			return;
-		}
-		parappa_.shareString(currentItem_.getTitle() + " " + currentItem_.getLink() + " #" + getResources().getString(R.string.app_name), "共有");
-	}
-	
 	private void shareAll() {
 		parappa_.shareString(getResources().getString(R.string.shareDescription) + " #" + getResources().getString(R.string.app_name), "紹介");
 	}
@@ -521,25 +382,25 @@ public class MudanewsActivity extends Activity {
 		setupGridColumns();
 	}
 
-	@Override
-	public boolean dispatchKeyEvent(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-			if (e.getAction() == KeyEvent.ACTION_DOWN) {
-				if (isViewingEntry_) {
-					flipper_.setInAnimation(anim_left_in_);
-					flipper_.setOutAnimation(anim_right_out_);
-					isViewingEntry_ = false;
-					flipper_.showPrevious();
-					WebView entryView = (WebView) MudanewsActivity.this
-							.findViewById(R.id.entryView);
-					entryView.clearView();
-					entryView.loadData("", "text/plain", "UTF-8");
-					return false;
-				}
-			}
-		}
-		return super.dispatchKeyEvent(e);
-	}
+// 	@Override
+// 	public boolean dispatchKeyEvent(KeyEvent e) {
+// 		if (e.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+// 			if (e.getAction() == KeyEvent.ACTION_DOWN) {
+// 				if (isViewingEntry_) {
+// 					flipper_.setInAnimation(anim_left_in_);
+// 					flipper_.setOutAnimation(anim_right_out_);
+// 					isViewingEntry_ = false;
+// 					flipper_.showPrevious();
+// 					WebView entryView = (WebView) MudanewsActivity.this
+// 							.findViewById(R.id.entryView);
+// 					entryView.clearView();
+// 					entryView.loadData("", "text/plain", "UTF-8");
+// 					return false;
+// 				}
+// 			}
+// 		}
+// 		return super.dispatchKeyEvent(e);
+// 	}
 
 	public DatabaseHelper getDbHelper() {
 		return dbHelper_;

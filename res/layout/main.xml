@@ -1,91 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ViewFlipper
-		xmlns:android="http://schemas.android.com/apk/res/android"
-		xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads" 
-		android:id="@+id/flipper"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads" 
+    	    android:id="@+id/main_view"
 		android:orientation="vertical"
-		android:layout_width="fill_parent"
-		android:layout_height="fill_parent">
-	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-     	    android:id="@+id/main_view"
-			android:orientation="vertical"
-			android:layout_width="fill_parent" style="@style/appLayout" android:layout_height="fill_parent">
-		<RelativeLayout  
-		        android:id="@+id/header"
-				android:layout_width="fill_parent"	
-				android:layout_height="wrap_content" android:background="#fd0000">
-			<ImageView android:layout_width="wrap_content" android:src="@drawable/header" android:id="@+id/imageView1" android:layout_height="wrap_content"></ImageView>
-			<TextView android:id="@+id/version" android:layout_height="wrap_content" android:textColor="#ffffffff" android:layout_width="fill_parent" android:height="40px" android:gravity="right|center" android:paddingRight="5px" android:textSize="12sp" android:text="Version 1.1.0"></TextView>  
-		</RelativeLayout>  
-		<LinearLayout android:layout_height="fill_parent" android:layout_width="fill_parent" android:id="@+id/linearLayout1" android:orientation="vertical">
-			<TextView
-			    android:id="@+id/initialMessage"
-			    android:layout_width="fill_parent"
-			    android:layout_height="0px"
-			    android:text="@string/initial_message" android:visibility="gone" android:textColor="#000000" android:layout_weight="1" android:layout_margin="20dp" android:textSize="18dp"/>
+		android:layout_width="fill_parent" style="@style/appLayout" android:layout_height="fill_parent">
+	<RelativeLayout  
+		android:id="@+id/header"
+			android:layout_width="fill_parent"	
+			android:layout_height="wrap_content" android:background="#fd0000">
+		<ImageView android:layout_width="wrap_content" android:src="@drawable/header" android:id="@+id/imageView1" android:layout_height="wrap_content"></ImageView>
+		<TextView android:id="@+id/version" android:layout_height="wrap_content" android:textColor="#ffffffff" android:layout_width="fill_parent" android:height="40px" android:gravity="right|center" android:paddingRight="5px" android:textSize="12sp" android:text="Version 1.1.0"></TextView>  
+	</RelativeLayout>  
+	<LinearLayout android:layout_height="fill_parent" android:layout_width="fill_parent" android:id="@+id/linearLayout1" android:orientation="vertical">
+		<TextView
+		    android:id="@+id/initialMessage"
+		    android:layout_width="fill_parent"
+		    android:layout_height="0px"
+		    android:text="@string/initial_message" android:visibility="gone" android:textColor="#000000" android:layout_weight="1" android:layout_margin="20dp" android:textSize="18dp"/>
 
-			<GridView
-					android:id="@+id/grid"
-					android:stretchMode="columnWidth" 
-					android:layout_width="fill_parent" 
-					android:numColumns="2" 
-					android:layout_height="0px"
-					android:layout_weight="1"
-					android:drawSelectorOnTop="false"
-					android:layout_alignParentTop="true" android:background="#ffffffff" android:padding="0dp">
-			</GridView>
-			<RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/relativeLayout1" android:layout_gravity="bottom">
-				<com.google.ads.AdView android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/adView"
-						ads:adUnitId="a14f636ef52e0aa"
-						ads:adSize="BANNER"
-						ads:loadAdOnCreate="true">
-				</com.google.ads.AdView>
-			</RelativeLayout>
-		</LinearLayout>
-	</LinearLayout>
-	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-			android:orientation="vertical"
-			android:layout_width="fill_parent"
-			android:background="#ffffffff"
-			android:layout_height="fill_parent">
-		<LinearLayout
-				xmlns:android="http://schemas.android.com/apk/res/android"
-				android:orientation="vertical"
-				android:layout_width="fill_parent"
-				android:layout_height="fill_parent">
-			<RelativeLayout
-					android:layout_width="fill_parent"	
-					android:layout_height="wrap_content" android:background="#fd0000">
-				<ImageView android:layout_width="wrap_content" android:src="@drawable/header" android:id="@+id/imageView1" android:layout_height="wrap_content"></ImageView>
-				<TextView android:id="@+id/version2" android:layout_height="wrap_content" android:textColor="#ffffffff" android:layout_width="fill_parent" android:height="40px" android:gravity="right|center" android:paddingRight="5px" android:textSize="12sp" android:text="Version 1.1.0"></TextView>  
-			</RelativeLayout>  
-		    <FrameLayout
-				android:layout_width="fill_parent"
+		<GridView
+				android:id="@+id/grid"
+				android:stretchMode="columnWidth" 
+				android:layout_width="fill_parent" 
+				android:numColumns="2" 
 				android:layout_height="0px"
-				android:layout_weight="1">
-				<WebView 
-					android:layout_width="fill_parent" 
-					android:layout_height="fill_parent"
-						android:id="@+id/entryView">
-				</WebView>
-				<ImageView
-					android:id="@+id/image_share"
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:contentDescription="Share"
-					android:layout_gravity="left|bottom"
-					android:padding="10dp"
-					android:visibility="visible"
-					android:src="@android:drawable/ic_menu_share" >
-				</ImageView>
-			</FrameLayout>
-			<RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/relativeLayout2" android:layout_gravity="bottom">
-				<com.google.ads.AdView android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/adView2"
-						ads:adUnitId="a14f636ef52e0aa"
-						ads:adSize="BANNER"
-						ads:loadAdOnCreate="true">
-				</com.google.ads.AdView>
-			</RelativeLayout>
-		</LinearLayout>
+				android:layout_weight="1"
+				android:drawSelectorOnTop="false"
+				android:layout_alignParentTop="true" android:background="#ffffffff" android:padding="0dp">
+		</GridView>
+		<RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/relativeLayout1" android:layout_gravity="bottom">
+			<com.google.ads.AdView android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/adView"
+					ads:adUnitId="a14f636ef52e0aa"
+					ads:adSize="BANNER"
+					ads:loadAdOnCreate="true">
+			</com.google.ads.AdView>
+		</RelativeLayout>
 	</LinearLayout>
-</ViewFlipper>
+</LinearLayout>
