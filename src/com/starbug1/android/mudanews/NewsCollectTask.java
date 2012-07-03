@@ -6,30 +6,29 @@ package com.starbug1.android.mudanews;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.ProgressDialog;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.GridView;
 
 import com.starbug1.android.mudanews.data.DatabaseHelper;
 import com.starbug1.android.mudanews.data.NewsListItem;
-import com.starbug1.android.rocknews.R;
 
 /**
  * @author smeghead
  *
  */
-public class NewsParserTask extends AsyncTask<String, Integer, List<NewsListItem>> {
+public class NewsCollectTask extends AsyncTask<String, Integer, List<NewsListItem>> {
 	private final int MAX_ENTRIES_PER_PAGE = 30;
 	private final MudanewsActivity activity_;
 	private final NewsListAdapter adapter_;
+	private final GridView grid_;
 	private int page_;
 
-	public NewsParserTask(MudanewsActivity activity, NewsListAdapter adapter) {
+	public NewsCollectTask(MudanewsActivity activity, GridView grid, NewsListAdapter adapter) {
 		activity_ = activity;
+		grid_ = grid;
 		adapter_ = adapter;
 		activity_.gridUpdating = true;
 	}
@@ -119,8 +118,7 @@ public class NewsParserTask extends AsyncTask<String, Integer, List<NewsListItem
 			addedCount++;
 		}
 		if (page_ == 0) {
-			GridView view = (GridView) activity_.findViewById(R.id.grid);
-			view.setAdapter(adapter_);
+			grid_.setAdapter(adapter_);
 		}
 		activity_.gridUpdating = false;
 	}

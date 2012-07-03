@@ -8,6 +8,7 @@ public class UrlUtils {
 		String ret = url;
 		ret = ret.replaceAll("/dqnplus/", "/dqnplus/lite/");
 		ret = ret.replaceAll("/labaq.com/", "/labaq.com/lite/");
+		ret = ret.replaceAll("ro69.jp/", "sp.ro69.jp/");
 		return ret;
 	}
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_all" android:icon="@*android:drawable/ic_menu_star" android:title="全て"></item><item android:id="@+id/menu_other" android:title="その他"  android:icon="@android:drawable/ic_menu_more">
+        <menu>
+		    <item android:id="@+id/menu_review" android:icon="@drawable/ic_menu_dialog" android:title="無駄新聞を評価する"></item>
+		    <item android:icon="@drawable/ic_menu_globe" android:id="@+id/menu_notify_all" android:title="無駄新聞を友達に紹介する"></item>
+		    <item android:id="@+id/menu_support" android:title="サポート" android:icon="@drawable/ic_menu_globe"/>
+        </menu>
+    </item>
+    
+    
+</menu>

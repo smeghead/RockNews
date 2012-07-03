@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -39,6 +40,7 @@ public class EntryActivity extends Activity {
 	private NewsListItem currentItem_ = null;
 	private DatabaseHelper dbHelper_ = null;
 	private PaRappa parappa_;
+	private WebView webview_;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,10 +57,10 @@ public class EntryActivity extends Activity {
 		currentItem_ = (NewsListItem) intent.getSerializableExtra("item");
 		
 
-		WebView entryView = (WebView) this
+		webview_ = (WebView) this
 				.findViewById(R.id.entryView);
 		
-		entryView.setWebViewClient(new WebViewClient() {
+		webview_.setWebViewClient(new WebViewClient() {
 
 			@Override
 			public void onPageStarted(WebView view, String url,
@@ -106,7 +108,7 @@ public class EntryActivity extends Activity {
 			}
 		});
 		
-		WebSettings ws = entryView.getSettings();
+		WebSettings ws = webview_.getSettings();
 		ws.setBuiltInZoomControls(true);
 		ws.setLoadWithOverviewMode(true);
 		ws.setPluginsEnabled(true);
@@ -116,8 +118,8 @@ public class EntryActivity extends Activity {
 		ws.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
 		ws.setDomStorageEnabled(true);
 		ws.setAppCacheEnabled(true);
-		entryView.setVerticalScrollbarOverlay(true);
-		entryView.loadUrl(UrlUtils.mobileUrl(currentItem_.getLink()));
+		webview_.setVerticalScrollbarOverlay(true);
+		webview_.loadUrl(UrlUtils.mobileUrl(currentItem_.getLink()));
 		progressDialog_ = new ProgressDialog(this);
 		progressDialog_.setMessage("読み込み中...");
 		progressDialog_.show();
@@ -198,5 +200,44 @@ public class EntryActivity extends Activity {
 		parappa_.shareString(getResources().getString(R.string.shareDescription) + " #" + getResources().getString(R.string.app_name), "紹介");
 	}		
 
+//	@Override
+//	public boolean onKeyDown(int keyCode, KeyEvent event) {
+//		if (keyCode == KeyEvent.KEYCODE_BACK) {
+//
+//			Log.d(TAG, "onKeyDown");
+//			Log.d(TAG, "onKeyDown cGeanGoBack:" + webview_.canGoBack());
+//			if (webview_.canGoBack()) {
+//				webview_.goBack();
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
+
+//	@Override
+//	protected void onDestroy() {
+//		Log.d(TAG, "onDestroy");
+//		Log.d(TAG, "onDestroy cGeanGoBack:" + webview_.canGoBack());
+//		if (webview_.canGoBack()) {
+//			webview_.goBack();
+//		} else {
+//			super.onDestroy();
+//		}
+//	}
+	
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent event) {
+		if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+			if (event.getAction() == KeyEvent.ACTION_DOWN) {
+				Log.d(TAG, "dispatchKeyEvent");
+				Log.d(TAG, "dispatchKeyEvent cGeanGoBack:" + webview_.canGoBack());
+				if (webview_.canGoBack()) {
+					webview_.goBack();
+					return true;
+				}
+			}
+		}
+		return super.dispatchKeyEvent(event);
+	}
 
 }

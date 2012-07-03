@@ -2,22 +2,15 @@ package com.starbug1.android.mudanews;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import me.parappa.sdk.PaRappa;
-
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -26,39 +19,31 @@ import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowManager;
-import android.webkit.WebView;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.starbug1.android.mudanews.data.DatabaseHelper;
 import com.starbug1.android.mudanews.data.NewsListItem;
 import com.starbug1.android.mudanews.utils.AppUtils;
-import com.starbug1.android.mudanews.utils.UrlUtils;
 import com.starbug1.android.rocknews.R;
-import com.starbug1.android.rocknews.RockNewsEntryActivity;
+import com.starbug1.android.rocknews.RockNewsFavoriteListActivity;
 import com.starbug1.android.rocknews.RockNewsPrefActivity;
 
-public class MudanewsActivity extends Activity {
+public class MudanewsActivity extends AbstractActivity {
 	private static final String TAG = "MudanewsActivity";
 	
 	private List<NewsListItem> items_;
-	private NewsListAdapter adapter_;
 	private int page_ = 0;
 	private ProgressDialog progressDialog_;
 	private DatabaseHelper dbHelper_ = null;
-	private NewsListItem currentItem_ = null;
+	private NewsListAdapter adapter_;
 	public boolean hasNextPage = true;
 	public boolean gridUpdating = false;
-	private PaRappa parappa_;
 
 	private FetchFeedService fetchFeedService_;
 	private boolean isBound_;
@@ -104,98 +89,16 @@ public class MudanewsActivity extends Activity {
 
 		page_ = 0; hasNextPage = true;
 		items_ = new ArrayList<NewsListItem>();
-		adapter_ = new NewsListAdapter(this, items_);
+		adapter_ = new NewsListAdapter(this);
 
 		String versionName = AppUtils.getVersionName(this);
 		TextView version = (TextView) this.findViewById(R.id.version);
 		version.setText(versionName);
 
 		final GridView grid = (GridView) this.findViewById(R.id.grid);
-		grid.setOnItemClickListener(new OnItemClickListener() {
+		grid.setOnItemClickListener(new NewsGridEvents.NewsItemClickListener(this));
 
-			public void onItemClick(AdapterView<?> adapter, View view,
-					int position, long id) {
-				NewsListItem item = items_.get(position);
-				currentItem_ = item;
-
-				final SQLiteDatabase db = dbHelper_.getWritableDatabase();
-				db.execSQL(
-						"insert into view_logs (feed_id, created_at) values (?, current_timestamp)",
-						new String[] { String.valueOf(item.getId()) });
-				db.close();
-
-				item.setViewCount(item.getViewCount() + 1);
-				ImageView newIcon = (ImageView) view
-						.findViewById(R.id.newEntry);
-				newIcon.setVisibility(ImageView.GONE);
-
-				Intent entryIntent = new Intent(MudanewsActivity.this, RockNewsEntryActivity.class);
-				entryIntent.putExtra("item", item);
-				MudanewsActivity.this.startActivity(entryIntent);
-				
-			}
-		});
-
-		grid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-			
-			public boolean onItemLongClick(AdapterView<?> arg0, View viewArg,
-					int position, long arg3) {
-				final View v = viewArg;
-				final NewsListItem item = items_.get(position);
-//			    Integer item_index = (Integer)v.getTag() - 1;
-				AlertDialog.Builder ad = new AlertDialog.Builder(MudanewsActivity.this);
-				ad.setTitle("記事のアクション");
-				ad.setItems(R.array.arrays_entry_actions, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						Log.d("NewsListAdapter", "longclickmenu selected id:" + item.getId());
-						String processName = MudanewsActivity.this.getResources().getStringArray(R.array.arrays_entry_action_values)[which];
-						final SQLiteDatabase db = dbHelper_.getWritableDatabase();
-						try {
-							if ("share".equals(processName)) {
-								//共有
-								parappa_.shareString(item.getTitle() + " " + item.getLink() + " #" + getResources().getString(R.string.app_name), "共有");
-							} else if ("make_favorite".equals(processName)) {
-								//お気に入り
-								db.execSQL(
-										"insert into favorites (feed_id, created_at) values (?, current_timestamp)",
-										new String[] { String.valueOf(item.getId()) });
-								item.setFavorite(true);
-								ImageView favorite = (ImageView) v
-										.findViewById(R.id.favorite);
-								favorite.setImageResource(android.R.drawable.btn_star_big_on);
-								Toast.makeText(MudanewsActivity.this, item.getTitle() + "をお気に入りにしました", Toast.LENGTH_LONG).show();
-							} else if ("make_read".equals(processName)) {
-								//既読にする
-								db.execSQL(
-										"insert into view_logs (feed_id, created_at) values (?, current_timestamp)",
-										new String[] { String.valueOf(item.getId()) });
-								item.setViewCount(item.getViewCount() + 1);
-								ImageView newIcon = (ImageView) v
-										.findViewById(R.id.newEntry);
-								newIcon.setVisibility(ImageView.GONE);
-								Toast.makeText(MudanewsActivity.this, item.getTitle() + "を既読にしました", Toast.LENGTH_LONG).show();
-							} else if ("delete".equals(processName)) {
-								//削除
-								db.execSQL(
-										"update feeds set deleted = 1 where id = ?",
-										new String[] { String.valueOf(item.getId()) });
-								items_.remove(item);
-								page_ = 0; hasNextPage = true;
-								Toast.makeText(MudanewsActivity.this, item.getTitle() + "を削除しました", Toast.LENGTH_LONG).show();
-								updateList(page_);
-							}
-						} catch (Exception e) {
-							Log.e(TAG, "failed to upate entry action.");
-						} finally {
-							db.close();
-						}
-					}
-				});
-				AlertDialog alert = ad.create();
-				alert.show();
-				return true;
-			}
-		});
+		grid.setOnItemLongClickListener(new NewsGridEvents.NewsItemLognClickListener(this));
 		Log.d(TAG, "grid setup");
 
 		grid.setOnScrollListener(new OnScrollListener() {
@@ -257,12 +160,19 @@ public class MudanewsActivity extends Activity {
 
 		NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		manager.cancelAll();
+		
+		// サービスが開始されていなかったら開始する
+		if (!AppUtils.isServiceRunning(this)) {
+			Intent intent = new Intent(this, FetchFeedService.class);
+			this.startService(intent);
+		}
+		
 		parappa_ = new PaRappa(this);
 	}
 
-	private NewsParserTask task_ = null;
+	private NewsCollectTask task_ = null;
 
-	public int column_count_ = 1;
+	private int column_count_ = 1;
 	private void setupGridColumns() {
 		WindowManager w = getWindowManager();
 		Display d = w.getDefaultDisplay();
@@ -271,11 +181,20 @@ public class MudanewsActivity extends Activity {
 		GridView grid = (GridView) this.findViewById(R.id.grid);
 		grid.setNumColumns(column_count_);
 	}
+	
+	public void resetGridInfo() {
+		page_ = 0; hasNextPage = true;
+		updateList(page_);
+	}
 
 	private void updateList(int page) {
 		setupGridColumns();
 
-		task_ = new NewsParserTask(this, adapter_);
+		if (page_ == 0) {
+			adapter_.clear();
+		}
+		GridView grid = (GridView) this.findViewById(R.id.grid);
+		task_ = new NewsCollectTask(this, grid, adapter_);
 		task_.execute(String.valueOf(page));
 	}
 
@@ -299,11 +218,6 @@ public class MudanewsActivity extends Activity {
 		case R.id.menu_update_feeds:
 			fetchFeeds();
 			break;
-		case R.id.menu_reload:
-			WebView entryView = (WebView) MudanewsActivity.this
-			.findViewById(R.id.entryView);
-			entryView.reload();
-			break;
 		case R.id.menu_settings:
 			settings();
 			break;
@@ -315,6 +229,10 @@ public class MudanewsActivity extends Activity {
 			break;
 		case R.id.menu_support:
 			parappa_.startSupportActivity();
+			break;
+		case R.id.menu_favorites:
+			Intent intent = new Intent(this, RockNewsFavoriteListActivity.class);
+			this.startActivity(intent);
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -382,27 +300,12 @@ public class MudanewsActivity extends Activity {
 		setupGridColumns();
 	}
 
-// 	@Override
-// 	public boolean dispatchKeyEvent(KeyEvent e) {
-// 		if (e.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-// 			if (e.getAction() == KeyEvent.ACTION_DOWN) {
-// 				if (isViewingEntry_) {
-// 					flipper_.setInAnimation(anim_left_in_);
-// 					flipper_.setOutAnimation(anim_right_out_);
-// 					isViewingEntry_ = false;
-// 					flipper_.showPrevious();
-// 					WebView entryView = (WebView) MudanewsActivity.this
-// 							.findViewById(R.id.entryView);
-// 					entryView.clearView();
-// 					entryView.loadData("", "text/plain", "UTF-8");
-// 					return false;
-// 				}
-// 			}
-// 		}
-// 		return super.dispatchKeyEvent(e);
-// 	}
-
 	public DatabaseHelper getDbHelper() {
 		return dbHelper_;
+	}
+
+	@Override
+	public int getGridColumnCount() {
+		return this.column_count_;
 	}
 }

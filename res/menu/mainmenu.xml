@@ -10,5 +10,5 @@
 		    <item android:id="@+id/menu_support" android:title="サポート" android:icon="@drawable/ic_menu_globe"/>
         </menu>
     </item>
-    
+    <item android:id="@+id/menu_favorites" android:title="お気に入り" android:icon="@android:drawable/ic_menu_gallery"></item>
 </menu>
