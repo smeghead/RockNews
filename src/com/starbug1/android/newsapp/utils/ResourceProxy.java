@@ -49,7 +49,7 @@ public final class ResourceProxy {
 				for (Class<?> c : resourceClass.getClasses()) {
 					Class<?> clazz = getClassByName(R.class, c.getName());
 					for (Field f : c.getDeclaredFields()) {
-						Log.d(TAG, c.getName() + "." + f.getName() + ": " + f.get(null));
+//						Log.d(TAG, c.getName() + "." + f.getName() + ": " + f.get(null));
 						clazz.getField(f.getName()).set(null, f.get(null));
 					}
 				}
