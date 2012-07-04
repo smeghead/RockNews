@@ -24,4 +24,14 @@
         <item>make_read</item>
         <item>delete</item>
     </string-array>
+    <string-array name="arrays_mobile_url_orgin">
+        <item>/dqnplus/</item>
+        <item>/labaq.com/</item>
+        <item>/ro69.jp/</item>
+    </string-array>
+    <string-array name="arrays_mobile_url_repleace">
+        <item>/dqnplus/lite/</item>
+        <item>/labaq.com/lite/</item>
+        <item>/sp.ro69.jp/</item>
+    </string-array>
 </resources>

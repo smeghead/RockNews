@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="false" android:theme="@style/CustomTheme">
-        <activity android:name=".RocknewsActivity"
+        <activity android:name="com.starbug1.android.newsapp.MainActivity"
                 android:label="@string/app_name"
                 android:configChanges="orientation|keyboardHidden">
             <intent-filter>
@@ -15,26 +15,26 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RockNewsEntryActivity"
+        <activity android:name="com.starbug1.android.newsapp.EntryActivity"
                 android:label="@string/app_name"
                 android:configChanges="orientation|keyboardHidden">
         </activity>
-        <activity android:name=".RockNewsFavoriteListActivity"
+        <activity android:name="com.starbug1.android.newsapp.FavoriteListActivity"
                 android:label="@string/app_name"
                 android:configChanges="orientation|keyboardHidden">
         </activity>
         <activity
             android:label="@string/app_name"
-            android:name=".RockNewsPrefActivity" >
+            android:name="com.starbug1.android.newsapp.AppPrefActivity" >
         </activity>
-        <receiver android:name="com.starbug1.android.mudanews.AlarmReceiver">
+        <receiver android:name="com.starbug1.android.newsapp.AlarmReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
                 <action android:name="com.android.vending.INSTALL_REFERRER" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
-        <service android:enabled="true" android:name="com.starbug1.android.mudanews.FetchFeedService" />
+        <service android:enabled="true" android:name="com.starbug1.android.rocknews.AppFetchFeedService" />
         <activity android:name="com.starbug1.android.mudanews.NewsDetailActivity"></activity>
         <activity
                 android:name="com.google.ads.AdActivity" 
