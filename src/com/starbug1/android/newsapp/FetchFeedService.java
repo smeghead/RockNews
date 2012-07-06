@@ -53,6 +53,7 @@ import com.starbug1.android.newsapp.utils.FlushedInputStream;
 import com.starbug1.android.newsapp.utils.InternetStatus;
 import com.starbug1.android.newsapp.utils.MetaDataUtil;
 import com.starbug1.android.newsapp.utils.ResourceProxy.R;
+import com.starbug1.android.newsapp.utils.UrlUtils;
 
 /**
  * @author smeghead
@@ -374,10 +375,14 @@ public abstract class FetchFeedService extends Service {
 				}
 			}
 			InputStream is = null;
+			FlushedInputStream fis = null;
 			try {
 				final URL url = new URL(imageUrl);
-				is = url.openConnection().getInputStream();
-				final Bitmap image = BitmapFactory.decodeStream(new FlushedInputStream(is));
+				URLConnection urlConn = url.openConnection();
+				urlConn.setRequestProperty( "Referer", UrlUtils.findSchemaDomain(imageUrl) );
+				is = urlConn.getInputStream();
+				fis = new FlushedInputStream(is);
+				final Bitmap image = BitmapFactory.decodeStream(fis);
 				
 				int heightOrg = image.getHeight(), widthOrg = image.getWidth();
 				int height = 0, width = 0;
@@ -416,6 +421,7 @@ public abstract class FetchFeedService extends Service {
 				Log.e(TAG, "[Exception] failed to get image." + e.getMessage() + " " + imageUrl);
 			} finally {
 				try {
+					if (fis != null) fis.close();
 					if (is != null) is.close();
 				} catch (Exception e) {}
 			}

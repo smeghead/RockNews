@@ -38,7 +38,7 @@
         </FrameLayout>
         <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/relativeLayout2" android:layout_gravity="bottom">
             <com.google.ads.AdView android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/adView2"
-                    ads:adUnitId="a14edaf2bb22e23"
+                    ads:adUnitId="a14f636ef52e0aa"
                     ads:adSize="BANNER"
                     ads:loadAdOnCreate="true">
             </com.google.ads.AdView>

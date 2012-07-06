@@ -14,6 +14,7 @@ public class UrlUtils {
 
 	private static final Pattern domainPattern_ = Pattern.compile("https?://([^/]*)");
 	private static String findDomain(String url) {
+		if (url == null) return "";
 		final Matcher m = domainPattern_.matcher(url);
 		if (!m.find()) {
 			return "";
@@ -22,6 +23,7 @@ public class UrlUtils {
 	}
 	
 	public static boolean isSameDomain(String originalUrl, String url) {
+		if (originalUrl == null) return true;
 		return findDomain(originalUrl).equals(findDomain(url));
 	}
 
