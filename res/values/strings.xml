@@ -5,4 +5,5 @@
     <string name="shareDescription">ロック関係の最新ニュースなら ロックニュース\n http://goo.gl/dOMPj</string>
     <string name="initial_message">インストールありがとうございます。\n記事取得中です。\n少々お待ちください。\n(初回の記事取得は時間がかかります)</string>
     <string name="no_favorites_message">お気に入りにした記事を纏めて見ることができます。\n記事の☆ボタンをタップするか、メニューからお気に入りに追加することができます。</string>
+    <string name="admob_id">a14f636ef52e0aa</string>
 </resources>
