@@ -5,40 +5,52 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.util.Log;
+
 import com.starbug1.android.newsapp.FetchFeedService;
 import com.starbug1.android.newsapp.data.NewsListItem;
 import com.starbug1.android.newsapp.utils.UrlUtils;
 
 public class AppFetchFeedService extends FetchFeedService {
+	private static final String TAG = "AppFetchFeedService";
 
-	private final Pattern imageUrl_ = Pattern.compile("<img.*?src=\"([^\"]*)\"", Pattern.MULTILINE);
-	private Pattern skreamContent_ = Pattern.compile("id=\"news-area\"(.*)id=\"sub-news\"", Pattern.DOTALL);
-	private Pattern ro69Content_ = Pattern.compile("article_body(.*)// div.article_body", Pattern.DOTALL);
+	private final Pattern imageUrl_ = Pattern.compile(
+			"<img.*?src=\"([^\"]*)\"", Pattern.MULTILINE);
+	private final Pattern skreamContent_ = Pattern.compile(
+			"id=\"news-area\"(.*)id=\"sub-news\"", Pattern.DOTALL);
+	private final Pattern ro69Content_ = Pattern
+			.compile(
+					"(article_body|detail_cap)(.*)(// div.article_body|id=\"detail_btn_bn\")",
+					Pattern.DOTALL);
 
 	@Override
 	protected List<Feed> getFeeds() {
 		List<Feed> feeds = new ArrayList<Feed>();
-		
-		feeds.add(new Feed("RO69", "http://ro69.jp/rss.xml") {
+
+		feeds.add(new Feed("RO69", "http://sp.ro69.jp/rss.xml") {
 
 			@Override
 			public String getImageUrl(String content, NewsListItem item) {
 				Matcher m = ro69Content_.matcher(content);
 				if (!m.find()) {
+					Log.w(TAG, "ro69Content_ not match");
 					return null;
 				}
-				String mainPart = m.group(1);
+				String mainPart = m.group(2);
+				Log.d(TAG, mainPart);
 				m = imageUrl_.matcher(mainPart);
 				if (!m.find()) {
+					Log.w(TAG, "imageUrl_ not match");
 					return null;
 				}
 				String imageUrl = m.group(1);
 				if (imageUrl != null && imageUrl.startsWith("/")) {
-					imageUrl = UrlUtils.findSchemaDomain(item.getLink()) + imageUrl;
+					imageUrl = UrlUtils.findSchemaDomain(item.getLink())
+							+ imageUrl;
 				}
 				return imageUrl;
 			}
-			
+
 		});
 		feeds.add(new Feed("Skream!", "http://skream.jp/news/index.xml") {
 
@@ -56,12 +68,12 @@ public class AppFetchFeedService extends FetchFeedService {
 				}
 				return m.group(1);
 			}
-			
+
 		});
 
 		return feeds;
 	}
-	
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -74,6 +86,5 @@ public class AppFetchFeedService extends FetchFeedService {
 		}
 		return super.isValidItem(item);
 	}
-	
-	
+
 }
